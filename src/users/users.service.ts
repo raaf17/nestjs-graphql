@@ -58,25 +58,25 @@ import { DeleteUserInput } from "./db/input/delete-user.input";
 
 @Injectable()
 export class UsersService {
-    private users: User[] = [];
+    private users: User[] = [
+        {
+            email: 'dan@example.com',
+            password: 'mypassword',
+            userId: '123',
+            age: 20,
+        }
+    ];
 
-    /**
-     * Create a new user and add to the list
-     */
     public createUser(createUserData: CreateUserInput): User {
         const user: User = {
             userId: uuidv4(),
-            ...createUserData
+            ...createUserData,
         };
 
         this.users.push(user);
         return user;
     }
 
-    /**
-     * Update an existing user
-     * Throws an error if user is not found
-     */
     public updateUser(updateUserData: UpdateUserInput): User {
         const user = this.users.find(user => user.userId === updateUserData.userId);
 
@@ -88,10 +88,6 @@ export class UsersService {
         return user;
     }
 
-    /**
-     * Get a single user by ID
-     * Throws an error if user is not found
-     */
     public getUser(getUserArgs: GetUserArgs): User {
         const user = this.users.find(user => user.userId === getUserArgs.userId);
 
@@ -102,20 +98,16 @@ export class UsersService {
         return user;
     }
 
-    /**
-     * Get multiple users by IDs
-     * Filters out users that are not found
-     */
+    public getUserByEmail(email: string): User | undefined {
+        return this.users.find(user => user.email === email)
+    }
+
     public getUsers(getUsersArgs: GetUsersArgs): User[] {
         return getUsersArgs.userIds
             .map(userId => this.users.find(user => user.userId === userId))
-            .filter((user): user is User => !!user); // Remove undefined users
+            .filter((user): user is User => !!user);
     }
 
-    /**
-     * Delete a user by ID
-     * Throws an error if user is not found
-     */
     public deleteUser(deleteUserData: DeleteUserInput): User {
         const userIndex = this.users.findIndex(user => user.userId === deleteUserData.userId);
 
@@ -123,6 +115,6 @@ export class UsersService {
             throw new Error(`User with ID ${deleteUserData.userId} not found`);
         }
 
-        return this.users.splice(userIndex, 1)[0]; // Remove and return the deleted user
+        return this.users.splice(userIndex, 1)[0];
     }
 }
